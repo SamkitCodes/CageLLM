@@ -1,0 +1,67 @@
+{
+  "config": {
+    "backend_type": null,
+    "prompt_name": null,
+    "episodes": 1,
+    "max_steps": 30,
+    "red_agent": "bline"
+  },
+  "summary": {
+    "total_episodes": 1,
+    "avg_reward": -61.70000000000002,
+    "std_reward": 0,
+    "min_reward": -61.70000000000002,
+    "max_reward": -61.70000000000002,
+    "avg_steps": 30,
+    "avg_duration": 1820.3556787967682,
+    "total_duration": 1820.3556787967682,
+    "red_agent_breakdown": {
+      "type": {
+        "count": 1,
+        "avg_reward": -61.70000000000002,
+        "success_rate": 0.0
+      }
+    }
+  },
+  "episodes": [
+    {
+      "episode_id": 0,
+      "total_reward": -61.70000000000002,
+      "steps": 30,
+      "duration": 1820.3556787967682,
+      "red_agent_type": "type",
+      "max_steps": 30
+    }
+  ],
+  "time_step_breakdown": [
+    {
+      "max_steps": 30,
+      "summary": {
+        "total_episodes": 1,
+        "avg_reward": -61.70000000000002,
+        "std_reward": 0,
+        "min_reward": -61.70000000000002,
+        "max_reward": -61.70000000000002,
+        "avg_steps": 30,
+        "avg_duration": 1820.3556787967682,
+        "total_duration": 1820.3556787967682,
+        "red_agent_breakdown": {
+          "type": {
+            "count": 1,
+            "avg_reward": -61.70000000000002,
+            "success_rate": 0.0
+          }
+        }
+      },
+      "episodes": [
+        {
+          "episode_id": 0,
+          "total_reward": -61.70000000000002,
+          "steps": 30,
+          "duration": 1820.3556787967682,
+          "red_agent_type": "type"
+        }
+      ]
+    }
+  ]
+}
