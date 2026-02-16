@@ -10,6 +10,9 @@ import inspect
 from PPOICMAgent import PPOICMAgent
 from tqdm import tqdm
 import random
+import csv
+import os
+
 
 PATH = str(inspect.getfile(CybORG))
 PATH = PATH[:-10] + '/Shared/Scenarios/Scenario2.yaml'
@@ -20,15 +23,27 @@ def train(env, input_dims, action_space,
           gamma, lr, betas, icm_beta, ckpt_folder, print_interval=10, save_interval=100):
 
     agent = PPOICMAgent(
-        input_dims, 
-        action_space, 
-        gamma, 
-        lr, 
-        eps_clip, 
-        K_epochs, 
+        input_dims,
+        action_space,
+        gamma,
+        lr,
+        eps_clip,
+        K_epochs,
         betas,
-        
+
     )
+
+    # ADDED: CSV reward logging setup 
+    rewards_dir = os.path.join(os.getcwd(), "rewards")
+    os.makedirs(rewards_dir, exist_ok=True)
+
+    log_path = os.path.join(rewards_dir, "episode_rewards.csv")
+    if not os.path.exists(log_path):
+        with open(log_path, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["episode", "reward_sum"])
+
+
     red_agents = [B_lineAgent, RedMeanderAgent]
     running_reward, time_step = 0, 0
 
@@ -36,17 +51,24 @@ def train(env, input_dims, action_space,
         red_agent = random.choice(red_agents)
         cyborg = CybORG(PATH, 'sim', agents={'Red': red_agent})
         env = ChallengeWrapper(env=cyborg, agent_name="Blue")
-        
+
         state = env.reset()
+
+        # ADDED: accumulate per-episode reward 
+        ep_reward = 0.0
+
         for t in range(max_timesteps):
             time_step += 1
             action = agent.get_action(state) # adds action to memory as well
             next_state, reward, done, _ = env.step(action)
-            
+
+            # ADDED: accumulate reward 
+            ep_reward += reward
+
             # Compute intrinsic reward and shape the reward
             intrinsic_reward = agent.compute_intrinsic_reward(state, next_state, action)
             shaped_reward = reward + agent.icm_beta * intrinsic_reward
-            
+
             agent.store(next_state, shaped_reward, done) # stores next_state, shaped_reward, done in memory
             state = next_state
 
@@ -58,6 +80,11 @@ def train(env, input_dims, action_space,
             running_reward += reward
 
         agent.end_episode()
+
+        # ADDED: write episode reward to CSV 
+        with open(log_path, "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([i_episode, ep_reward])
 
         if i_episode % save_interval == 0:
             ckpt = os.path.join(ckpt_folder, '{}.pth'.format(i_episode))
@@ -83,16 +110,16 @@ if __name__ == '__main__':
     CYBORG = CybORG(PATH, 'sim', agents={
         'Red': B_lineAgent
     })
-    
+
     env = ChallengeWrapper(env=CYBORG, agent_name="Blue")
     input_dims = env.observation_space.shape[0]
     action_space = env.action_space.n
-    
+
     print_interval = 50
     save_interval = 500
     max_episodes = 500000
     max_timesteps = 100
-  
+
     update_timesteps = 20000
     K_epochs = 6
     eps_clip = 0.2
